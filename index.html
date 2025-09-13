@@ -49,6 +49,15 @@
     <button onclick="translateAddress()">Recover</button>
     <div id="translateResult" class="output"></div>
 
+    <!-- Direct Address Translation -->
+    <h2>Address-to-Address Translation</h2>
+    <p>
+      Convert addresses between blockchains (DOGE, FLO, BTC) 
+    </p>
+    <input id="addressToTranslate" placeholder="Enter DOGE / BTC / FLO address" />
+    <button onclick="translateDirectAddress()">Translate</button>
+    <div id="directTranslateResult" class="output"></div>
+
     <script>
       function generateMultiChain() {
         try {
@@ -77,6 +86,21 @@
           );
         } catch (err) {
           document.getElementById("translateResult").innerText =
+            "Error: " + err.message;
+        }
+      }
+
+      function translateDirectAddress() {
+        const address = document.getElementById("addressToTranslate").value.trim();
+        try {
+          const result = floCrypto.translateAddress(address);
+          document.getElementById("directTranslateResult").innerText = JSON.stringify(
+            result,
+            null,
+            2
+          );
+        } catch (err) {
+          document.getElementById("directTranslateResult").innerText =
             "Error: " + err.message;
         }
       }
