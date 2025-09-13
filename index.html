@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>RanchiMall Dogecoin Web Wallet - Test Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      h2 {
+        margin-top: 30px;
+      }
+      input,
+      button {
+        margin: 5px 0;
+        width: 100%;
+        padding: 8px;
+      }
+      .output {
+        background: #f5f5f5;
+        padding: 10px;
+        border: 1px solid #ddd;
+        min-height: 40px;
+        white-space: pre-wrap;
+      }
+    </style>
+
+    <script src="doge/lib.dogecoin.js"></script>
+    <script src="doge/dogeCrypto.js"></script>
+    <script src="doge/dogeBlockchainAPI.js"></script>
+  </head>
+  <body>
+    <h1>RanchiMall Dogecoin Web Wallet - Function Tester</h1>
+
+    <!--  Multi-Chain Address Generation -->
+    <h2>Generate Multi-Blockchain Addresses</h2>
+    <p></p>
+    <button onclick="generateMultiChain()">Generate</button>
+    <div id="multiResult" class="output"></div>
+
+    <!-- Recover Address -->
+    <h2>Recover Multi-Blockchain Addresses</h2>
+    <p>
+      Recover all blockchain addresses (DOGE, FLO, BTC) from a single private
+      key
+    </p>
+    <input id="translateWIF" placeholder="Enter DOGE / BTC / FLO WIF" />
+    <button onclick="translateAddress()">Recover</button>
+    <div id="translateResult" class="output"></div>
+
+    <script>
+      function generateMultiChain() {
+        try {
+          const result = floCrypto.generateMultiChain();
+          /* Expected format:
+           { DOGE: {address, wif}, FLO: {...}, BTC: {...} } */
+          document.getElementById("multiResult").innerText = JSON.stringify(
+            result,
+            null,
+            2
+          );
+        } catch (err) {
+          document.getElementById("multiResult").innerText =
+            "Error: " + err.message;
+        }
+      }
+
+      function translateAddress() {
+        const wif = document.getElementById("translateWIF").value.trim();
+        try {
+          const result = floCrypto.generateMultiChain(wif);
+          document.getElementById("translateResult").innerText = JSON.stringify(
+            result,
+            null,
+            2
+          );
+        } catch (err) {
+          document.getElementById("translateResult").innerText =
+            "Error: " + err.message;
+        }
+      }
+    </script>
+  </body>
+</html>
