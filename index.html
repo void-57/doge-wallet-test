@@ -42,19 +42,23 @@
     <!-- Recover Address -->
     <h2>Recover Multi-Blockchain Addresses</h2>
     <p>
-      Recover all blockchain addresses (DOGE, FLO, BTC) from a single private
-      key
+      Recover all blockchain addresses (DOGE, FLO, BTC, LTC) from a single
+      private key
     </p>
-    <input id="translateWIF" placeholder="Enter DOGE / BTC / FLO WIF" />
+    <input
+      id="translateWIF"
+      placeholder="Enter DOGE / BTC / FLO / LTC private key"
+    />
     <button onclick="translateAddress()">Recover</button>
     <div id="translateResult" class="output"></div>
 
     <!-- Direct Address Translation -->
     <h2>Address-to-Address Translation</h2>
-    <p>
-      Convert addresses between blockchains (DOGE, FLO, BTC) 
-    </p>
-    <input id="addressToTranslate" placeholder="Enter DOGE / BTC / FLO address" />
+    <p>Convert addresses between blockchains (DOGE, FLO, BTC, LTC)</p>
+    <input
+      id="addressToTranslate"
+      placeholder="Enter DOGE / BTC / FLO / LTC address"
+    />
     <button onclick="translateDirectAddress()">Translate</button>
     <div id="directTranslateResult" class="output"></div>
 
@@ -91,14 +95,13 @@
       }
 
       function translateDirectAddress() {
-        const address = document.getElementById("addressToTranslate").value.trim();
+        const address = document
+          .getElementById("addressToTranslate")
+          .value.trim();
         try {
           const result = floCrypto.translateAddress(address);
-          document.getElementById("directTranslateResult").innerText = JSON.stringify(
-            result,
-            null,
-            2
-          );
+          document.getElementById("directTranslateResult").innerText =
+            JSON.stringify(result, null, 2);
         } catch (err) {
           document.getElementById("directTranslateResult").innerText =
             "Error: " + err.message;
