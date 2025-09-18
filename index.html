@@ -26,6 +26,7 @@
       }
     </style>
 
+    <script src="doge/floGlobals.js"></script>
     <script src="doge/lib.dogecoin.js"></script>
     <script src="doge/dogeCrypto.js"></script>
     <script src="doge/dogeBlockchainAPI.js"></script>
@@ -61,6 +62,21 @@
     />
     <button onclick="translateDirectAddress()">Translate</button>
     <div id="directTranslateResult" class="output"></div>
+
+    <!-- Dogecoin Balance Section -->
+    <h2>Check Dogecoin Balance</h2>
+    <input id="balanceAddress" placeholder="Enter DOGE address" />
+    <button onclick="checkDogeBalance()">Check Balance</button>
+    <div id="balanceResult" class="output"></div>
+
+    <!-- Dogecoin Transaction History -->
+    <h2>Dogecoin Transaction History</h2>
+    <input id="txHistoryAddress" placeholder="Enter DOGE address" />
+    <button onclick="getDogeTransactions()">Get Transactions</button>
+    <div id="txHistoryResult" class="output"></div>
+
+    
+    
 
     <script>
       function generateMultiChain() {
@@ -106,6 +122,135 @@
           document.getElementById("directTranslateResult").innerText =
             "Error: " + err.message;
         }
+      }
+
+      // Dogecoin API Functions
+      function checkDogeBalance() {
+        const address = document.getElementById("balanceAddress").value.trim();
+        if (!address) {
+          document.getElementById("balanceResult").innerText =
+            "Error: Please enter a Dogecoin address";
+          return;
+        }
+
+        document.getElementById("balanceResult").innerText = "Loading...";
+
+        floBlockchainAPI
+          .getBalance(address)
+          .then((result) => {
+            document.getElementById("balanceResult").innerText =
+              result + " DOGE";
+          })
+          .catch((error) => {
+            document.getElementById("balanceResult").innerText =
+              "Error: " + error.message;
+          });
+      }
+
+      function getDogeTransactions() {
+        const address = document
+          .getElementById("txHistoryAddress")
+          .value.trim();
+        if (!address) {
+          document.getElementById("txHistoryResult").innerText =
+            "Error: Please enter a Dogecoin address";
+          return;
+        }
+
+        document.getElementById("txHistoryResult").innerText =
+          "Loading... (this may take a moment)";
+
+        floBlockchainAPI
+          .getDogeTransactions(address, { limit: 10 })
+          .then((result) => {
+            if (!result.transactions || result.transactions.length === 0) {
+              document.getElementById("txHistoryResult").innerText =
+                "No transactions found for this address.";
+              return;
+            }
+
+            console.log("All transactions:", result.transactions);
+
+            const displayTransactions = result.transactions.map((tx) => {
+              let valueDisplay = "";
+              let txType = "";
+
+              let numericValue = parseFloat(tx.value);
+
+              switch (tx.type) {
+                case "received":
+                  valueDisplay = "+" + numericValue.toFixed(8) + " DOGE";
+                  txType = "📥 Received";
+                  break;
+                case "sent":
+                  // Ensure negative values display correctly
+                  valueDisplay = numericValue.toFixed(8) + " DOGE";
+                  txType = "📤 Sent";
+                  break;
+                case "self":
+                  // Self transactions typically represent the fee paid
+                  valueDisplay = numericValue.toFixed(8) + " DOGE (fee)";
+                  txType = "🔄 Self";
+                  break;
+                default:
+                  valueDisplay = numericValue.toFixed(8) + " DOGE";
+                  txType = "❓ Unknown";
+              }
+
+              return {
+                txid: tx.txid , 
+                type: txType,
+                value: valueDisplay,
+                time: tx.formattedTime || "Unknown",
+                confirmations: tx.confirmations || 0,
+                
+                link: `https://dogechain.info/tx/${tx.txid}`,
+              };
+            });
+
+            // formatted output
+            let outputHtml = `<h3>Transactions for ${address}</h3>
+              <p>Showing ${result.transactions.length} of ${result.total} transactions</p>
+              <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Type</th>
+                    <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Amount</th>
+                    <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">Date</th>
+                    <th style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">TxID</th>
+                  </tr>
+                </thead>
+                <tbody>`;
+
+            displayTransactions.forEach((tx) => {
+              let rowColor = "";
+              if (tx.value.includes("+")) rowColor = "color:green;";
+              else if (tx.value.includes("-")) rowColor = "color:red;";
+
+              outputHtml += `
+                <tr>
+                  <td style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">${tx.type}</td>
+                  <td style="text-align:left; padding:8px; border-bottom:1px solid #ddd; ${rowColor}">${tx.value}</td>
+                  <td style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">${tx.time}</td>
+                  <td style="text-align:left; padding:8px; border-bottom:1px solid #ddd;">
+                    <a href="${tx.link}" target="_blank">${tx.txid}</a>
+                  </td>
+                </tr>`;
+            });
+
+            outputHtml += `
+                </tbody>
+              </table>`;
+
+           
+
+            document.getElementById("txHistoryResult").innerHTML = outputHtml;
+          })
+          .catch((error) => {
+            console.error("Transaction error:", error);
+            document.getElementById("txHistoryResult").innerText =
+              "Error: " + (error.message || "Failed to fetch transactions");
+          });
       }
     </script>
   </body>
