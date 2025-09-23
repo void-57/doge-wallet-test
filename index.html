@@ -26,7 +26,6 @@
       }
     </style>
 
-    <script src="doge/floGlobals.js"></script>
     <script src="doge/lib.dogecoin.js"></script>
     <script src="doge/dogeCrypto.js"></script>
     <script src="doge/dogeBlockchainAPI.js"></script>
@@ -75,8 +74,26 @@
     <button onclick="getDogeTransactions()">Get Transactions</button>
     <div id="txHistoryResult" class="output"></div>
 
-    
-    
+    <!-- Send Dogecoin -->
+    <h2>Send Dogecoin</h2>
+    <div>
+      <input id="senderAddress" placeholder="Sender's DOGE address" />
+      <input
+        id="privateKey"
+        placeholder="Sender's Private Key"
+        type="password"
+      />
+      <input id="receiverAddress" placeholder="Recipient's DOGE address" />
+      <input
+        id="sendAmount"
+        placeholder="Amount to send (DOGE)"
+        type="number"
+        step="0.00000001"
+        min="1"
+      />
+      <button onclick="sendDogeRPC()">Send DOGE (RPC)</button>
+      <div id="sendResult" class="output"></div>
+    </div>
 
     <script>
       function generateMultiChain() {
@@ -137,16 +154,16 @@
 
         floBlockchainAPI
           .getBalance(address)
-          .then((result) => {
+          .then((balance) => {
+            console.log("Balance retrieved:", balance);
             document.getElementById("balanceResult").innerText =
-              result + " DOGE";
+              balance + " DOGE";
           })
           .catch((error) => {
-            document.getElementById("balanceResult").innerText =
-              "Error: " + error.message;
+            console.error("Error using getBalance:", error);
           });
       }
-
+      // Transaction History
       function getDogeTransactions() {
         const address = document
           .getElementById("txHistoryAddress")
@@ -172,39 +189,31 @@
             console.log("All transactions:", result.transactions);
 
             const displayTransactions = result.transactions.map((tx) => {
+              let numericValue = parseFloat(tx.value);
               let valueDisplay = "";
               let txType = "";
 
-              let numericValue = parseFloat(tx.value);
-
-              switch (tx.type) {
-                case "received":
-                  valueDisplay = "+" + numericValue.toFixed(8) + " DOGE";
-                  txType = "📥 Received";
-                  break;
-                case "sent":
-                  // Ensure negative values display correctly
-                  valueDisplay = numericValue.toFixed(8) + " DOGE";
-                  txType = "📤 Sent";
-                  break;
-                case "self":
-                  // Self transactions typically represent the fee paid
-                  valueDisplay = numericValue.toFixed(8) + " DOGE (fee)";
-                  txType = "🔄 Self";
-                  break;
-                default:
-                  valueDisplay = numericValue.toFixed(8) + " DOGE";
-                  txType = "❓ Unknown";
+              if (numericValue > 0) {
+                // Coins received
+                valueDisplay = "+" + numericValue.toFixed(8) + " DOGE";
+                txType = "📥 Received";
+              } else if (numericValue < 0) {
+                // Coins sent
+                valueDisplay = numericValue.toFixed(8) + " DOGE";
+                txType = "📤 Sent";
+              } else {
+                
+                valueDisplay = numericValue.toFixed(8) + " DOGE (fee)";
+                txType = "🔄 Self / Fee";
               }
 
               return {
-                txid: tx.txid , 
+                txid: tx.txid,
                 type: txType,
                 value: valueDisplay,
                 time: tx.formattedTime || "Unknown",
                 confirmations: tx.confirmations || 0,
-                
-                link: `https://dogechain.info/tx/${tx.txid}`,
+                link: `https://blockchair.com/dogecoin/transaction/${tx.txid}`,
               };
             });
 
@@ -242,14 +251,60 @@
                 </tbody>
               </table>`;
 
-           
-
             document.getElementById("txHistoryResult").innerHTML = outputHtml;
           })
           .catch((error) => {
             console.error("Transaction error:", error);
             document.getElementById("txHistoryResult").innerText =
               "Error: " + (error.message || "Failed to fetch transactions");
+          });
+      }
+
+      // Send Dogecoin using RPC method
+      function sendDogeRPC() {
+        const senderAddress = document
+          .getElementById("senderAddress")
+          .value.trim();
+        const privateKey = document.getElementById("privateKey").value.trim();
+        const receiverAddress = document
+          .getElementById("receiverAddress")
+          .value.trim();
+        const sendAmount = parseFloat(
+          document.getElementById("sendAmount").value
+        );
+
+        if (
+          !senderAddress ||
+          !privateKey ||
+          !receiverAddress ||
+          isNaN(sendAmount) ||
+          sendAmount <= 0
+        ) {
+          document.getElementById("sendResult").innerText =
+            "Error: Please fill in all fields with valid values";
+          return;
+        }
+
+        document.getElementById("sendResult").innerText =
+          "Processing transaction...";
+
+        floBlockchainAPI
+          .sendDogecoinRPC(
+            senderAddress,
+            receiverAddress,
+            sendAmount,
+            privateKey
+          )
+          .then((txid) => {
+            document.getElementById(
+              "sendResult"
+            ).innerHTML = `<p>Transaction successful!</p>
+              <p>Transaction ID: <a href="https://blockchair.com/dogecoin/transaction/${txid}" target="_blank">${txid}</a></p>`;
+          })
+          .catch((error) => {
+            document.getElementById("sendResult").innerText =
+              "Transaction failed: " + (error.message || error);
+            console.error("Transaction error:", error);
           });
       }
     </script>

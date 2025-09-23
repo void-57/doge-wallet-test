@@ -1,6 +1,5 @@
 (function (EXPORTS) {
-  //floCrypto v2.3.6a
-  /* FLO Crypto Operators */
+  
   "use strict";
   const floCrypto = EXPORTS;
 
