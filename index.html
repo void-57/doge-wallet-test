@@ -24,6 +24,36 @@
         min-height: 40px;
         white-space: pre-wrap;
       }
+
+      #txPagination {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+      }
+
+      #txPagination button {
+        padding: 8px 15px;
+        background-color: #f5f5f5;
+        border: 1px solid #ddd;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #txPagination button:hover:not(:disabled) {
+        background-color: #e0e0e0;
+      }
+
+      #txPagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      #txPageInfo {
+        font-size: 0.9em;
+        color: #666;
+        text-align: center;
+        margin-top: 5px;
+      }
     </style>
 
     <script src="doge/lib.dogecoin.js"></script>
@@ -73,6 +103,15 @@
     <input id="txHistoryAddress" placeholder="Enter DOGE address" />
     <button onclick="getDogeTransactions()">Get Transactions</button>
     <div id="txHistoryResult" class="output"></div>
+    <div id="txPagination" style="display: none">
+      <button id="prevTxButton" onclick="loadPreviousTransactions()">
+        &lt; Previous
+      </button>
+      <button id="nextTxButton" onclick="loadNextTransactions()">
+        Next &gt;
+      </button>
+    </div>
+    <div id="txPageInfo"></div>
 
     <!-- Send Dogecoin -->
     <h2>Send Dogecoin</h2>
@@ -96,6 +135,11 @@
     </div>
 
     <script>
+      let currentTxOffset = 0;
+      const txPerPage = 10;
+      let totalTxCount = 0;
+      let currentTxAddress = "";
+
       function generateMultiChain() {
         try {
           const result = floCrypto.generateMultiChain();
@@ -174,17 +218,32 @@
           return;
         }
 
+        currentTxOffset = 0;
+        currentTxAddress = address;
+
+        fetchTransactionsWithPagination();
+      }
+
+      function fetchTransactionsWithPagination() {
         document.getElementById("txHistoryResult").innerText =
           "Loading... (this may take a moment)";
 
+        document.getElementById("txPagination").style.display = "none";
+        document.getElementById("txPageInfo").innerText = "";
+
         floBlockchainAPI
-          .getDogeTransactions(address, { limit: 10 })
+          .getDogeTransactions(currentTxAddress, {
+            limit: txPerPage,
+            offset: currentTxOffset,
+          })
           .then((result) => {
             if (!result.transactions || result.transactions.length === 0) {
               document.getElementById("txHistoryResult").innerText =
                 "No transactions found for this address.";
               return;
             }
+
+            totalTxCount = result.total || 0;
 
             console.log("All transactions:", result.transactions);
 
@@ -202,7 +261,6 @@
                 valueDisplay = numericValue.toFixed(8) + " DOGE";
                 txType = "📤 Sent";
               } else {
-                
                 valueDisplay = numericValue.toFixed(8) + " DOGE (fee)";
                 txType = "🔄 Self / Fee";
               }
@@ -216,10 +274,15 @@
                 link: `https://blockchair.com/dogecoin/transaction/${tx.txid}`,
               };
             });
+            const currentPage = Math.floor(currentTxOffset / txPerPage) + 1;
+            const totalPages = Math.ceil(totalTxCount / txPerPage);
 
             // formatted output
-            let outputHtml = `<h3>Transactions for ${address}</h3>
-              <p>Showing ${result.transactions.length} of ${result.total} transactions</p>
+            let outputHtml = `<h3>Transactions for ${currentTxAddress}</h3>
+              <p>Showing transactions ${currentTxOffset + 1}-${Math.min(
+              currentTxOffset + result.transactions.length,
+              totalTxCount
+            )} of ${totalTxCount}</p>
               <table style="width:100%; border-collapse:collapse;">
                 <thead>
                   <tr>
@@ -252,6 +315,12 @@
               </table>`;
 
             document.getElementById("txHistoryResult").innerHTML = outputHtml;
+
+            // Show pagination controls if we have more than one page
+            if (totalTxCount > txPerPage) {
+              document.getElementById("txPagination").style.display = "flex";
+              updatePaginationControls();
+            }
           })
           .catch((error) => {
             console.error("Transaction error:", error);
@@ -306,6 +375,36 @@
               "Transaction failed: " + (error.message || error);
             console.error("Transaction error:", error);
           });
+      }
+
+      // Pagination functions for transaction history
+      function loadPreviousTransactions() {
+        if (currentTxOffset >= txPerPage) {
+          currentTxOffset -= txPerPage;
+          fetchTransactionsWithPagination();
+        }
+      }
+
+      function loadNextTransactions() {
+        if (currentTxOffset + txPerPage < totalTxCount) {
+          currentTxOffset += txPerPage;
+          fetchTransactionsWithPagination();
+        }
+      }
+
+      function updatePaginationControls() {
+        const currentPage = Math.floor(currentTxOffset / txPerPage) + 1;
+        const totalPages = Math.ceil(totalTxCount / txPerPage);
+
+        document.getElementById(
+          "txPageInfo"
+        ).textContent = `Page ${currentPage} of ${totalPages}`;
+
+        // Enable/disable buttons based on current position
+        document.getElementById("prevTxButton").disabled =
+          currentTxOffset === 0;
+        document.getElementById("nextTxButton").disabled =
+          currentTxOffset + txPerPage >= totalTxCount;
       }
     </script>
   </body>
