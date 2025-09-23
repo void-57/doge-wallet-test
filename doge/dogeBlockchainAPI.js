@@ -1,13 +1,13 @@
 (function (EXPORTS) {
   "use strict";
-  const floBlockchainAPI = EXPORTS;
+  const dogeBlockchainAPI = EXPORTS;
 
   const DEFAULT = {
     fee: 0.09,
   };
 
   //Get balance for the given Address
-  floBlockchainAPI.getBalance = function (addr) {
+  dogeBlockchainAPI.getBalance = function (addr) {
     return new Promise((resolve, reject) => {
       fetch(
         `https://go.getblock.io/b05a36f1d01d401196afbb1d3957a9f3/api/address/${addr}`
@@ -83,7 +83,7 @@
    * @param {number} options.offset - Offset for pagination
    * @returns {Promise} Promise object that resolves with transaction list
    */
-  floBlockchainAPI.getDogeTransactions = function (address, options = {}) {
+  dogeBlockchainAPI.getDogeTransactions = function (address, options = {}) {
     return new Promise((resolve, reject) => {
       console.log(`Fetching transaction history for: ${address}`);
       fetch(
@@ -260,20 +260,20 @@
    * @param {string} privKey - Private key of the sender
    * @returns {Promise} Promise that resolves with the transaction ID
    */
-  floBlockchainAPI.sendDogecoinRPC = function (
+  dogeBlockchainAPI.sendDogecoinRPC = function (
     senderAddr,
     receiverAddr,
     sendAmt,
     privKey
   ) {
     return new Promise((resolve, reject) => {
-      if (!floCrypto.validateDogeID(senderAddr, true))
+      if (!dogeCrypto.validateDogeID(senderAddr, true))
         return reject(`Invalid sender address: ${senderAddr}`);
-      if (!floCrypto.validateDogeID(receiverAddr))
+      if (!dogeCrypto.validateDogeID(receiverAddr))
         return reject(`Invalid receiver address: ${receiverAddr}`);
       if (typeof sendAmt !== "number" || sendAmt <= 0)
         return reject(`Invalid send amount: ${sendAmt}`);
-      if (privKey.length < 1 || !floCrypto.verifyPrivKey(privKey, senderAddr))
+      if (privKey.length < 1 || !dogeCrypto.verifyPrivKey(privKey, senderAddr))
         return reject("Invalid Private key!");
 
       const fee = DEFAULT.fee;
@@ -368,5 +368,5 @@
     });
   };
 })(
-  "object" === typeof module ? module.exports : (window.floBlockchainAPI = {})
+  "object" === typeof module ? module.exports : (window.dogeBlockchainAPI = {})
 );

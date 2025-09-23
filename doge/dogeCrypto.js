@@ -1,11 +1,11 @@
 (function (EXPORTS) {
   
   "use strict";
-  const floCrypto = EXPORTS;
+  const dogeCrypto = EXPORTS;
 
 
   //Generates a new flo ID and returns private-key, public-key and floID
-  const generateNewID = (floCrypto.generateNewID = function () {
+  const generateNewID = (dogeCrypto.generateNewID = function () {
     var key = new Bitcoin.ECKey(false);
     key.setCompressed(true);
     return {
@@ -15,7 +15,7 @@
     };
   });
 
-  Object.defineProperties(floCrypto, {
+  Object.defineProperties(dogeCrypto, {
     newID: {
       get: () => generateNewID(),
     },
@@ -58,11 +58,11 @@
   
 
   //Verify the private-key for the given public-key or doge-ID
-  floCrypto.verifyPrivKey = function (privateKeyWIF, dogeAddress) {
+  dogeCrypto.verifyPrivKey = function (privateKeyWIF, dogeAddress) {
     if (!privateKeyWIF || !dogeAddress) return false;
     try {
       var derivedAddress =
-        floCrypto.generateMultiChain(privateKeyWIF).DOGE.address;
+        dogeCrypto.generateMultiChain(privateKeyWIF).DOGE.address;
       return derivedAddress === dogeAddress;
     } catch (e) {
       console.error("verifyPrivKey error:", e);
@@ -71,7 +71,7 @@
   };
 
   //Check if the given doge-id is valid or not
-  floCrypto.validateDogeID = function (dogeID) {
+  dogeCrypto.validateDogeID = function (dogeID) {
     if (!dogeID) return false;
     try {
       // Decode Base58Check
@@ -86,7 +86,7 @@
   };
 
   //Generates multi-chain addresses (DOGE, BTC, FLO, LTC) from the given WIF or new WIF
-  floCrypto.generateMultiChain = function (inputWif) {
+  dogeCrypto.generateMultiChain = function (inputWif) {
     try {
         const origBitjsPub = bitjs.pub;
         const origBitjsPriv = bitjs.priv;
@@ -185,7 +185,7 @@
    * Translates an address from one blockchain to equivalent addresses on other chains
    * Works by extracting the public key hash from the address and recreating addresses with different version bytes
    */
-  floCrypto.translateAddress = function (address) {
+  dogeCrypto.translateAddress = function (address) {
     try {
       let sourceChain = null;
 
@@ -278,4 +278,4 @@
       throw new Error("Address translation failed: " + err.message);
     }
   };
-})("object" === typeof module ? module.exports : (window.floCrypto = {}));
+})("object" === typeof module ? module.exports : (window.dogeCrypto = {}));

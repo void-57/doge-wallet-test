@@ -142,7 +142,7 @@
 
       function generateMultiChain() {
         try {
-          const result = floCrypto.generateMultiChain();
+          const result = dogeCrypto.generateMultiChain();
           /* Expected format:
            { DOGE: {address, wif}, FLO: {...}, BTC: {...} } */
           document.getElementById("multiResult").innerText = JSON.stringify(
@@ -159,7 +159,7 @@
       function translateAddress() {
         const wif = document.getElementById("translateWIF").value.trim();
         try {
-          const result = floCrypto.generateMultiChain(wif);
+          const result = dogeCrypto.generateMultiChain(wif);
           document.getElementById("translateResult").innerText = JSON.stringify(
             result,
             null,
@@ -176,7 +176,7 @@
           .getElementById("addressToTranslate")
           .value.trim();
         try {
-          const result = floCrypto.translateAddress(address);
+          const result = dogeCrypto.translateAddress(address);
           document.getElementById("directTranslateResult").innerText =
             JSON.stringify(result, null, 2);
         } catch (err) {
@@ -196,7 +196,7 @@
 
         document.getElementById("balanceResult").innerText = "Loading...";
 
-        floBlockchainAPI
+        dogeBlockchainAPI
           .getBalance(address)
           .then((balance) => {
             console.log("Balance retrieved:", balance);
@@ -231,7 +231,7 @@
         document.getElementById("txPagination").style.display = "none";
         document.getElementById("txPageInfo").innerText = "";
 
-        floBlockchainAPI
+        dogeBlockchainAPI
           .getDogeTransactions(currentTxAddress, {
             limit: txPerPage,
             offset: currentTxOffset,
@@ -357,7 +357,7 @@
         document.getElementById("sendResult").innerText =
           "Processing transaction...";
 
-        floBlockchainAPI
+        dogeBlockchainAPI
           .sendDogecoinRPC(
             senderAddress,
             receiverAddress,
