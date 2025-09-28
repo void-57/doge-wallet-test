@@ -1476,12 +1476,7 @@
         // Make sure the transaction section is visible
         document.getElementById("transactionSection").style.display = "block";
 
-        document.getElementById("txList").innerHTML = `
-          <div class="loading-state">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading transactions... (this may take a moment)</p>
-          </div>
-        `;
+        
 
         document.getElementById("paginationInfo").innerText = "";
 
@@ -1746,12 +1741,7 @@
           sendAmount,
           function () {
             setButtonLoading("sendBtn", true);
-            document.getElementById("sendResult").innerHTML = `
-            <div class="loading-state">
-              <i class="fas fa-spinner fa-spin"></i>
-              <p>Processing transaction... This may take a moment.</p>
-            </div>
-          `;
+            
 
             dogeBlockchainAPI
               .sendDogecoinRPC(
@@ -2017,12 +2007,6 @@
         }
 
         txOutputElement.style.display = "block";
-        txOutputElement.innerHTML = `
-          <div class="loading-state">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Searching transaction details...</p>
-          </div>
-        `;
 
         if (document.getElementById("balanceResult")) {
           document.getElementById("balanceResult").innerHTML = "";
