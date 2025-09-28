@@ -127,8 +127,8 @@
           console.log(`Processing ${txsToProcess.length} transactions`);
 
           const transactions = txsToProcess;
-          console.log("Transactions to process:", transactions  );
-          
+          console.log("Transactions to process:", transactions);
+
           try {
             const processedTransactions = transactions.map((tx) => {
               const inputs = tx.vin || [];
@@ -149,6 +149,34 @@
 
               let type = "unknown";
               let value = 0;
+              let fromAddresses = [];
+              let toAddresses = [];
+
+              // Extract sender addresses (from)
+              inputs.forEach((input) => {
+                if (input.addresses && input.addresses.length > 0) {
+                  input.addresses.forEach((addr) => {
+                    if (!fromAddresses.includes(addr)) {
+                      fromAddresses.push(addr);
+                    }
+                  });
+                }
+              });
+
+              // Extract recipient addresses (to)
+              outputs.forEach((output) => {
+                const outAddresses =
+                  output.addresses ||
+                  (output.scriptPubKey ? output.scriptPubKey.addresses : []);
+
+                if (outAddresses && outAddresses.length > 0) {
+                  outAddresses.forEach((addr) => {
+                    if (!toAddresses.includes(addr)) {
+                      toAddresses.push(addr);
+                    }
+                  });
+                }
+              });
 
               if (isSender && isReceiver) {
                 type = "self";
@@ -215,10 +243,12 @@
                 type,
                 value: value.toFixed(8),
                 time: timestamp,
-                blockHeight:  tx.blockheight,
+                blockHeight: tx.blockheight,
                 formattedTime: new Date(timestamp * 1000).toLocaleString(),
                 confirmations: tx.confirmations || 0,
                 rawTx: tx.hex,
+                fromAddresses: fromAddresses,
+                toAddresses: toAddresses,
               };
             });
 
@@ -365,6 +395,111 @@
           }
         })
         .catch((error) => reject(error));
+    });
+  };
+  /**
+   * Get transaction details by transaction ID
+   * @param {string} txid - The transaction ID to look up
+   * @returns {Promise} Promise object that resolves with transaction details
+   */
+  dogeBlockchainAPI.getTransactionDetails = function (txid) {
+    return new Promise((resolve, reject) => {
+      if (!txid || typeof txid !== "string" || txid.length !== 64) {
+        reject(new Error("Invalid transaction ID format"));
+        return;
+      }
+
+      console.log(`Fetching transaction details for txid: ${txid}`);
+
+      fetch(
+        `https://go.getblock.io/b05a36f1d01d401196afbb1d3957a9f3/api/tx/${txid}`
+      )
+        .then((response) => {
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("Transaction not found");
+            } else if (response.status === 429) {
+              throw new Error(
+                "API rate limit exceeded. Please try again later."
+              );
+            }
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Transaction details data:", data);
+
+          if (!data || !data.txid) {
+            throw new Error("Invalid transaction data returned");
+          }
+
+          const processedData = {
+            txid: data.txid,
+            blockHeight: data.blockheight,
+            blockHash: data.blockhash,
+            blockTime: data.blocktime
+              ? new Date(data.blocktime * 1000).toLocaleString()
+              : "Pending",
+            confirmations: data.confirmations || 0,
+            fees: data.fees,
+            size: data.size,
+            inputsCount: data.vin ? data.vin.length : 0,
+            outputsCount: data.vout ? data.vout.length : 0,
+            totalInput: 0,
+            totalOutput: 0,
+            inputs: [],
+            outputs: [],
+          };
+
+          // Process inputs
+          if (data.vin && Array.isArray(data.vin)) {
+            data.vin.forEach((input) => {
+              const inputValue = parseFloat(input.value || 0);
+              processedData.totalInput += inputValue;
+
+              const inputData = {
+                txid: input.txid,
+                vout: input.vout,
+                addresses: input.addresses || [],
+                value: inputValue,
+              };
+
+              processedData.inputs.push(inputData);
+            });
+          }
+
+          // Process outputs
+          if (data.vout && Array.isArray(data.vout)) {
+            data.vout.forEach((output) => {
+              const outputValue = parseFloat(output.value || 0);
+              processedData.totalOutput += outputValue;
+
+              const addresses =
+                output.scriptPubKey && output.scriptPubKey.addresses
+                  ? output.scriptPubKey.addresses
+                  : [];
+
+              const outputData = {
+                n: output.n,
+                addresses: addresses,
+                value: outputValue,
+                spent: output.spent || false,
+                scriptPubKey: output.scriptPubKey
+                  ? output.scriptPubKey.hex
+                  : "",
+              };
+
+              processedData.outputs.push(outputData);
+            });
+          }
+
+          resolve(processedData);
+        })
+        .catch((error) => {
+          console.error("Error fetching transaction details:", error);
+          reject(error);
+        });
     });
   };
 })(
