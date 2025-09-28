@@ -1620,6 +1620,13 @@ h4 {
   color: var(--primary-color);
 }
 
+.transaction-details .transaction-header .share-btn {
+  position: relative;
+  right: 0;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-color);
+}
+
 .balance-header h3 {
   margin: 0 0 0.5rem 0;
   color: var(--text-primary);
@@ -3030,122 +3037,124 @@ h4 {
   .balance-display .balance-amount {
     font-size: 1.5rem;
   }
+}
 
-  :root {
-    --primary-color-rgb: 59, 130, 246;
-    --success-color-rgb: 16, 185, 129;
-    --error-color-rgb: 239, 68, 68;
-    --warning-color-rgb: 245, 158, 11;
-  }
+/* Transaction Success/Error UI */
+:root {
+  --primary-color-rgb: 59, 130, 246;
+  --success-color-rgb: 16, 185, 129;
+  --error-color-rgb: 239, 68, 68;
+  --warning-color-rgb: 245, 158, 11;
+}
 
-  .transaction-success,
-  .transaction-error {
-    padding: 1.5rem 1rem;
-    text-align: center;
-    background: #192231; /* Exact dark blue from image */
-    border-radius: 0.5rem;
-    position: relative;
-    margin: 1rem auto;
-    color: var(--text-color);
-    max-width: 400px;
-    width: 100%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
+.transaction-success,
+.transaction-error {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: #192231; /* Exact dark blue from image */
+  border-radius: 0.5rem;
+  position: relative;
+  margin: 1rem auto;
+  color: var(--text-color);
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
-  .transaction-success h3 {
-    font-size: 1.25rem;
-    margin: 0.5rem 0;
-    color: #0abe81; /* Teal color for success */
-    font-weight: 600;
-  }
+.transaction-success h3 {
+  font-size: 1.25rem;
+  margin: 0.5rem 0;
+  color: #0abe81; 
+  font-weight: 600;
+}
 
   @media (max-width: 768px) {
     .tx-detail-value {
       margin-left: 0;
     }
-  }
+}
 
-  .transaction-error h3 {
-    font-size: 1.25rem;
-    margin: 0.75rem 0;
-    color: var(--danger-color);
-    font-weight: 600;
-  }
+.transaction-error h3 {
+  font-size: 1.25rem;
+  margin: 0.75rem 0;
+  color: var(--danger-color);
+  font-weight: 600;
+}
 
-  .success-message,
-  .error-message {
-    color: var(--text-secondary);
-    margin-bottom: 1rem;
-    font-size: 0.8125rem;
-    opacity: 0.75;
-  }
+.success-message,
+.error-message {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+  opacity: 0.75;
+}
 
-  .success-animation,
-  .error-animation {
-    margin: 0 auto 1rem;
-  }
+.success-animation,
+.error-animation {
+  margin: 0 auto 1rem;
+}
 
-  .checkmark-circle,
-  .error-circle {
-    width: 4rem;
-    height: 4rem;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  }
+.checkmark-circle,
+.error-circle {
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
 
-  .checkmark-circle {
-    background: transparent;
-    border: 2px solid #0abe81;
-    width: 3.5rem;
-    height: 3.5rem;
-  }
+.checkmark-circle {
+  background: transparent;
+  border: 2px solid #0abe81;
+  width: 3.5rem;
+  height: 3.5rem;
+}
 
-  .error-circle {
-    background: transparent;
-    border: 2px solid var(--danger-color);
-    animation: error-pulse 2s infinite;
-  }
+.error-circle {
+  background: transparent;
+  border: 2px solid var(--danger-color);
+  animation: error-pulse 2s infinite;
+}
 
-  .checkmark {
-    color: #0abe81;
-    font-size: 1.5rem;
-    animation: scale-in 0.5s ease-out;
-  }
+.checkmark {
+  color: #0abe81;
+  font-size: 1.5rem;
+  animation: scale-in 0.5s ease-out;
+}
 
-  .error-icon {
-    color: var(--danger-color);
-    font-size: 1.5rem;
-    animation: scale-in 0.5s ease-out;
-  }
+.error-icon {
+  color: var(--danger-color);
+  font-size: 1.5rem;
+  animation: scale-in 0.5s ease-out;
+}
 
-  @keyframes scale-in {
-    0% {
-      transform: scale(0);
-    }
-    70% {
-      transform: scale(1.2);
-    }
-    100% {
-      transform: scale(1);
-    }
+@keyframes scale-in {
+  0% {
+    transform: scale(0);
   }
+  70% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
 
-  @keyframes error-pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(var(--error-color-rgb), 0.4);
-    }
-    70% {
-      box-shadow: 0 0 0 10px rgba(var(--error-color-rgb), 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(var(--error-color-rgb), 0);
-    }
+@keyframes error-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--error-color-rgb), 0.4);
   }
+  70% {
+    box-shadow: 0 0 0 10px rgba(var(--error-color-rgb), 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--error-color-rgb), 0);
+  }
+}
 
   /* Transaction Details Card */
   .tx-details-card {
@@ -3388,4 +3397,4 @@ h4 {
     font-size: 0.8rem;
     word-break: break-all;
   }
-}
+
